@@ -73,8 +73,7 @@ class WebSocketServer {
   }
 
   async onData(command: string, streamClient: ws.WebSocket) {
-    const firstCommandWord = command.split(' ')[0];
-    const restCommandWords = command.split(' ').filter((_, index) => +index !== 0);
+    const [firstCommandWord, ...restCommandWords] = command.split(' ');
     const commandHandler = this.getHandler(firstCommandWord!);
     this.runCommandHandler(commandHandler, restCommandWords, streamClient);
     console.log(command, restCommandWords, streamClient);
@@ -87,7 +86,7 @@ class WebSocketServer {
     }
 
     try {
-      const res = await handler(+args[0], this.getWebsocketStream(streamClient));
+      const res = await handler(+args[0], this.getWebsocketStream(streamClient), args);
       console.log('res ' + res);
     } catch(error) {
       console.error(error);
