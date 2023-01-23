@@ -1,5 +1,6 @@
 import internal from 'node:stream';
 import * as ws from 'ws';
+import { handler } from './handler/handler';
 
 const host = 'localhost';
 const port = process.env.hasOwnProperty('WEBSOCKET_PORT') ? +process.env['WEBSOCKET_PORT']! : 8082;
@@ -72,8 +73,25 @@ class WebSocketServer {
   }
 
   async onData(command: string, streamClient: ws.WebSocket) {
-    console.log(command, streamClient);
+    const firstCommandWord = command.split(' ')[0];
+    const restCommandWords = command.split(' ').filter((_, index) => +index !== 0);
+    const commandHandler = this.getHandler(firstCommandWord!);
+    this.runCommandHandler(commandHandler, restCommandWords, streamClient);
+    console.log(command, restCommandWords, streamClient);
     //TODO ADD HANDLER
+  }
+
+  async runCommandHandler(handler: any, args: any, streamClient: ws.WebSocket) {
+    if (typeof handler !== 'function') {
+      return;
+    }
+
+    try {
+      const res = await handler(+args[0], this.getWebsocketStream(streamClient));
+      console.log('res ' + res);
+    } catch(error) {
+      console.error(error);
+    }
   }
 
   onClose() {
@@ -84,6 +102,21 @@ class WebSocketServer {
     this.webSocketServer?.clients.forEach((client: ws.WebSocket) => client.close());
     this.webSocketServer?.close((err: Error | undefined) => console.log(err));
   }
+
+  getHandler = (command: string) => {
+    switch (command) {
+        case 'mouse_up': return handler.mouseUp;
+        case 'mouse_right': return handler.mouseRight;
+        case 'mouse_down': return handler.mouseDown;
+        case 'mouse_left': return handler.mouseLeft;
+        case 'mouse_position': return handler.mousePosition;
+        case 'draw_circle': return handler.drawCircle;
+        case 'draw_square': return handler.drawSquare;
+        case 'draw_rectangle': return handler.drawRectangle;
+        case 'prnt_scrn': return handler.printScreen;
+        default: return async () => {};
+    }
+}
 }
 
 const webSocketServer = new WebSocketServer(host, port);
