@@ -1,6 +1,7 @@
 import internal from 'node:stream';
 import * as ws from 'ws';
 import { handler } from './handler/handler';
+import { closeServers } from '../closeServers';
 
 const host = 'localhost';
 const port = process.env.hasOwnProperty('WEBSOCKET_PORT') ? +process.env['WEBSOCKET_PORT']! : 8082;
@@ -18,6 +19,7 @@ class WebSocketServer {
 
   listen() {
     this.createServer();
+    this.addCloseListeners();
   }
 
   createServer() {
@@ -30,6 +32,15 @@ class WebSocketServer {
       return this.webSocketServer;
     } 
     return this.webSocketServer;
+  }
+
+  addCloseListeners() {
+    process.on('exit', closeServers);
+    process.on('SIGINT', closeServers);
+    process.on('SIGHUP', closeServers);
+    process.on('SIGQUIT', closeServers);
+    process.on('SIGTERM', closeServers);
+    process.on('uncaughtException', closeServers);
   }
 
   getServer() {
@@ -76,8 +87,6 @@ class WebSocketServer {
     const [firstCommandWord, ...restCommandWords] = command.split(' ');
     const commandHandler = this.getHandler(firstCommandWord!);
     this.runCommandHandler(commandHandler, restCommandWords, streamClient);
-    console.log(command, restCommandWords, streamClient);
-    //TODO ADD HANDLER
   }
 
   async runCommandHandler(handler: any, args: any, streamClient: ws.WebSocket) {
