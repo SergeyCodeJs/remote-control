@@ -29,3 +29,10 @@ Command | Description
 `npm run start` | App served @ `http://localhost:8181` without nodemon
 
 **Note**: replace `npm` with `yarn` in `package.json` if you use yarn.
+
+
+Deadline: 2023-01-24 03:00 (UTC+3)
+
+Task: https://github.com/AlreadyBored/nodejs-assignments/blob/main/assignments/remote-control/assignment.md
+
+How to calculate score: https://github.com/AlreadyBored/nodejs-assignments/blob/main/assignments/remote-control/score.md

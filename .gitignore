@@ -1,5 +1,9 @@
 # dependencies
 /node_modules
+dist
+
+# env files
+.env
 
 # System Files
 .DS_Store
